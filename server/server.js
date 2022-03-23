@@ -6,7 +6,8 @@ const configureMongoose = require('./config/mongoose');
 const configureExpress = require('./config/express');
 //
 const { graphqlHTTP } = require('express-graphql');
-var schema = require('./graphql/studentSchemas');
+var studentSchema = require('./graphql/studentSchemas');
+var courseSchema = require('./graphql/courseSchema');
 var cors = require("cors");
 
 
@@ -18,8 +19,14 @@ const app = configureExpress();
 
 //configure GraphQL to use over HTTP
 app.use('*', cors());
-app.use('/graphql', cors(), graphqlHTTP({
-  schema: schema,
+app.use('/graphql/student', cors(), graphqlHTTP({
+  schema: studentSchema,
+  rootValue: global,
+  graphiql: true,
+}));
+
+app.use('/graphql/course', cors(), graphqlHTTP({
+  schema: courseSchema,
   rootValue: global,
   graphiql: true,
 }));

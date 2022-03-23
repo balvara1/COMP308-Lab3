@@ -1,5 +1,5 @@
 // Set the 'development' environment configuration object
 module.exports = {
-	db: 'mongodb://localhost/comp308-lab3',
+	db: 'mongodb://localhost/centennial',
 	sessionSecret: 'developmentSessionSecret'
 };

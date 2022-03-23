@@ -2,18 +2,21 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const { courseSchema } = require('./Course');
+
 // Define a new 'StudentSchema'
 const StudentSchema = new Schema({
     id: String,
-    studentNumber: Number,
+    studentNumber: String,
     password: String,
     firstName: String,
     lastName: String,
     address: String,
     city: String,
-    phone: Number,
+    phone: String,
     email: String,
-    program: String,	
+    program: String,
+    enrolledCourses: [courseSchema]
 });
 
 // Create the 'Student' model out of the 'StudentSchema'

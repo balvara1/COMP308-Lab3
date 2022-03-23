@@ -8,6 +8,7 @@ var GraphQLString = require("graphql").GraphQLString;
 var GraphQLInt = require("graphql").GraphQLInt;
 var GraphQLDate = require("graphql-date");
 var StudentModel = require("../models/Student");
+const { courseType, courseTypeInput } = require("./courseSchema");
 //
 // Create a GraphQL Object Type for Student model
 const studentType = new GraphQLObjectType({
@@ -18,7 +19,7 @@ const studentType = new GraphQLObjectType({
         type: GraphQLString,
       },
       studentNumber: {
-        type: GraphQLInt,
+        type: GraphQLString,
       },
       password: {
         type: GraphQLString,
@@ -36,7 +37,7 @@ const studentType = new GraphQLObjectType({
         type: GraphQLString,
       },
       phone: {
-        type: GraphQLInt,
+        type: GraphQLString,
       },
       email: {
         type: GraphQLString,
@@ -44,6 +45,9 @@ const studentType = new GraphQLObjectType({
       program: {
         type: GraphQLString,
       },
+      enrolledCourses: {
+        type: new GraphQLList(courseType)
+      }
     };
   },
 });
@@ -92,7 +96,7 @@ const mutation = new GraphQLObjectType({
         type: studentType,
         args: {
           studentNumber: {
-            type: new GraphQLNonNull(GraphQLInt)
+            type: new GraphQLNonNull(GraphQLString)
           },
           password: {
             type: new GraphQLNonNull(GraphQLString)
@@ -110,7 +114,7 @@ const mutation = new GraphQLObjectType({
             type: new GraphQLNonNull(GraphQLString)
           },
           phone: {
-            type: new GraphQLNonNull(GraphQLInt)
+            type: new GraphQLNonNull(GraphQLString)
           },
           email: {
             type: new GraphQLNonNull(GraphQLString)
@@ -118,6 +122,9 @@ const mutation = new GraphQLObjectType({
           program: {
             type: new GraphQLNonNull(GraphQLString)
           },
+          enrolledCourses: {
+            type: new GraphQLList(courseTypeInput)
+          }
         },
         resolve: function (root, params) {
           const studentModel = new StudentModel(params);
@@ -135,38 +142,69 @@ const mutation = new GraphQLObjectType({
             name: "id",
             type: new GraphQLNonNull(GraphQLString)
           },
+          // studentNumber: {
+          //   type: new GraphQLNonNull(GraphQLString)
+          // },
+          // password: {
+          //   type: new GraphQLNonNull(GraphQLString)
+          // },
+          // firstName: {
+          //   type: new GraphQLNonNull(GraphQLString)
+          // },
+          // lastName: {
+          //   type: new GraphQLNonNull(GraphQLString)
+          // },
+          // address: {
+          //   type: new GraphQLNonNull(GraphQLString)
+          // },
+          // city: {
+          //   type: new GraphQLNonNull(GraphQLString)
+          // },
+          // phone: {
+          //   type: new GraphQLNonNull(GraphQLString)
+          // },
+          // email: {
+          //   type: new GraphQLNonNull(GraphQLString)
+          // },
+          // program: {
+          //   type: new GraphQLNonNull(GraphQLString)
+          // },
           studentNumber: {
-            type: new GraphQLNonNull(GraphQLInt)
+            type: GraphQLString
           },
           password: {
-            type: new GraphQLNonNull(GraphQLString)
+            type: GraphQLString
           },
           firstName: {
-            type: new GraphQLNonNull(GraphQLString)
+            type: GraphQLString
           },
           lastName: {
-            type: new GraphQLNonNull(GraphQLString)
+            type: GraphQLString
           },
           address: {
-            type: new GraphQLNonNull(GraphQLString)
+            type: GraphQLString
           },
           city: {
-            type: new GraphQLNonNull(GraphQLString)
+            type: GraphQLString
           },
           phone: {
-            type: new GraphQLNonNull(GraphQLInt)
+            type: GraphQLString
           },
           email: {
-            type: new GraphQLNonNull(GraphQLString)
+            type: GraphQLString
           },
           program: {
-            type: new GraphQLNonNull(GraphQLString)
+            type: GraphQLString
+          },
+          enrolledCourses: {
+            type: new GraphQLList(courseTypeInput)
           }
         },
         resolve(root, params) {
             return StudentModel.findByIdAndUpdate(params.id, { studentNumber: params.studentNumber,
             password: params.password, firstName: params.firstName, lastName: params.lastName,
-            address: params.address, city: params.city, phone: params.phone, email: params.email, program: params.program
+            address: params.address, city: params.city, phone: params.phone, email: params.email, program: params.program,
+            enrolledCourses: params.enrolledCourses
         }, function (err) {
             if (err) return next(err);
         });
