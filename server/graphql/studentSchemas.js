@@ -8,6 +8,7 @@ var GraphQLString = require("graphql").GraphQLString;
 var GraphQLInt = require("graphql").GraphQLInt;
 var GraphQLDate = require("graphql-date");
 var StudentModel = require("../models/Student");
+const { courseModel } = require("../models/Course");
 const { courseType, courseTypeInput } = require("./courseSchema");
 //
 // Create a GraphQL Object Type for Student model
@@ -67,6 +68,25 @@ const queryType = new GraphQLObjectType({
           return students;
         },
       },
+
+      studentsByCourse: {
+        type: new GraphQLList(studentType),
+        args: {
+          courseCode: {
+            name: 'courseCode',
+            type: GraphQLString
+          }
+        },
+        resolve: function (root, params) {
+          console.log('params coursecode -> ', params.courseCode);
+          const students = StudentModel.find({ "enrolledCourses.courseCode": params.courseCode }).exec();
+          if (!students) {
+            throw new Error('Error')
+          }
+          return students;
+        }
+      },
+
       student: {
         type: studentType,
         args: {
@@ -83,6 +103,16 @@ const queryType = new GraphQLObjectType({
           return studentInfo;
         },
       },
+      courses: {
+        type: new GraphQLList(courseType),
+        resolve: function () {
+          const courses = courseModel.find().exec();
+          if (!courses) {
+            throw new Error("Error");
+          }
+          return courses;
+        },
+      }
     };
   },
 });
@@ -142,59 +172,32 @@ const mutation = new GraphQLObjectType({
             name: "id",
             type: new GraphQLNonNull(GraphQLString)
           },
-          // studentNumber: {
-          //   type: new GraphQLNonNull(GraphQLString)
-          // },
-          // password: {
-          //   type: new GraphQLNonNull(GraphQLString)
-          // },
-          // firstName: {
-          //   type: new GraphQLNonNull(GraphQLString)
-          // },
-          // lastName: {
-          //   type: new GraphQLNonNull(GraphQLString)
-          // },
-          // address: {
-          //   type: new GraphQLNonNull(GraphQLString)
-          // },
-          // city: {
-          //   type: new GraphQLNonNull(GraphQLString)
-          // },
-          // phone: {
-          //   type: new GraphQLNonNull(GraphQLString)
-          // },
-          // email: {
-          //   type: new GraphQLNonNull(GraphQLString)
-          // },
-          // program: {
-          //   type: new GraphQLNonNull(GraphQLString)
-          // },
           studentNumber: {
-            type: GraphQLString
+            type: new GraphQLNonNull(GraphQLString)
           },
           password: {
-            type: GraphQLString
+            type: new GraphQLNonNull(GraphQLString)
           },
           firstName: {
-            type: GraphQLString
+            type: new GraphQLNonNull(GraphQLString)
           },
           lastName: {
-            type: GraphQLString
+            type: new GraphQLNonNull(GraphQLString)
           },
           address: {
-            type: GraphQLString
+            type: new GraphQLNonNull(GraphQLString)
           },
           city: {
-            type: GraphQLString
+            type: new GraphQLNonNull(GraphQLString)
           },
           phone: {
-            type: GraphQLString
+            type: new GraphQLNonNull(GraphQLString)
           },
           email: {
-            type: GraphQLString
+            type: new GraphQLNonNull(GraphQLString)
           },
           program: {
-            type: GraphQLString
+            type: new GraphQLNonNull(GraphQLString)
           },
           enrolledCourses: {
             type: new GraphQLList(courseTypeInput)

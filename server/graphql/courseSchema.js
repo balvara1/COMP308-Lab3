@@ -29,7 +29,7 @@ const courseType = new GraphQLObjectType({
 });
 
 const courseTypeInput = new GraphQLInputObjectType({
-  name: 'enrolledCourses',
+  name: 'courseType',
   fields: () => ({
 		courseCode: {
 			type: GraphQLString
@@ -47,26 +47,24 @@ const courseTypeInput = new GraphQLInputObjectType({
 });
 
 // create a GraphQL query type that returns all courses
-const queryType = new GraphQLObjectType({
-  name: "Query",
-  fields: function () {
-    return {
-      courses: {
-        type: new GraphQLList(courseTypeInput),
-        resolve: function () {
-          const courses = courseModel.find().exec();
-          if (!courses) {
-            throw new Error("Error");
-          }
-          return courses;
-        },
-      },
-    };
-  },
-});
+// const queryType = new GraphQLObjectType({
+//   name: "Query",
+//   fields: function () {
+//     return {
+//       courses: {
+//         type: new GraphQLList(courseType),
+//         resolve: function () {
+//           const courses = courseModel.find().exec();
+//           if (!courses) {
+//             throw new Error("Error");
+//           }
+//           return courses;
+//         },
+//       },
+//     };
+//   },
+// });
 
-
-module.exports.courseSchema = new GraphQLSchema({query: queryType});
 module.exports.courseType = courseType;
-
 module.exports.courseTypeInput = courseTypeInput;
+// module.exports.courseSchema = new GraphQLSchema({query: queryType});
