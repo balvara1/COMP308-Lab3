@@ -6,7 +6,7 @@ export default function Logout({showSnackBar, clearTokens}) {
 	const navigate = useNavigate();
 
   const { authTokens } = useAuth();
-	const [studentId, setStudentId] = useState(authTokens.data.id);
+	const [studentId, setStudentId] = useState(authTokens.id);
 
 	// get the student data
 	useEffect(() => {

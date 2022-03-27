@@ -10,7 +10,12 @@ var GraphQLDate = require("graphql-date");
 var StudentModel = require("../models/Student");
 const { courseModel } = require("../models/Course");
 const { courseType, courseTypeInput } = require("./courseSchema");
-//
+const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
+const config = require("../config/config");
+const jwtExpirySeconds = 300;
+const jwtKey = config.secretKey;
+
 // Create a GraphQL Object Type for Student model
 const studentType = new GraphQLObjectType({
   name: "student",
@@ -52,6 +57,21 @@ const studentType = new GraphQLObjectType({
     };
   },
 });
+
+// Create a GraphQL Object Type for Student model
+const loginType = new GraphQLObjectType({
+  name: "login",
+  fields: function () {
+    return {
+      id: {
+        type: GraphQLString,
+      },
+      email: {
+        type: GraphQLString,
+      }
+    };
+  },
+});
 //
 // create a GraphQL query type that returns all students or a student by id
 const queryType = new GraphQLObjectType({
@@ -87,6 +107,43 @@ const queryType = new GraphQLObjectType({
         }
       },
 
+      // authenticate: {
+      //   type: loginType,
+      //   args: {
+      //     email: {
+      //       name: "email",
+      //       type: GraphQLString,
+      //     },
+      //     password: {
+      //       name: "password",
+      //       type: GraphQLString,
+      //     },
+      //   },
+      //   resolve: async function (root, params) {
+      //     console.log('params -> ', params);
+      //     const student = await StudentModel.findOne({email: params.email}).exec()
+      //     if(!student) {
+      //       throw new Error('Invalid Username!');
+      //     }
+
+      //     console.log('student -> ', student);
+      //     const isCorrectPassword = await bcrypt.compare(params.password, student.password);
+      //     if (!isCorrectPassword) {
+      //         throw new Error("Invalid Credentials!password")
+      //     }
+
+      //     // const token = jwt.sign({ _id: user._id, email: user.email }, jwtKey, {
+      //     //   algorithm: "RS256"
+      //     // });
+
+      //     // console.log('token:', token)
+      //     return {
+      //       id: student._id,
+      //       email: student.email
+      //     };
+      //   }
+      // },
+
       student: {
         type: studentType,
         args: {
@@ -103,6 +160,7 @@ const queryType = new GraphQLObjectType({
           return studentInfo;
         },
       },
+
       courses: {
         type: new GraphQLList(courseType),
         resolve: function () {
@@ -214,20 +272,55 @@ const mutation = new GraphQLObjectType({
         }
       },
       deleteStudent: {
-          type: studentType,
-          args: {
-              id: {
-                  type: new GraphQLNonNull(GraphQLString)
-              }
-          },
-          resolve(root, params) {
-              const deletedStudent = StudentModel.findByIdAndRemove(params.id).exec();
-              if (!deletedStudent) {
-                  throw new Error('Error')
-              }
-              return deletedStudent;
+        type: studentType,
+        args: {
+          id: {
+              type: new GraphQLNonNull(GraphQLString)
           }
-      }
+        },
+        resolve(root, params) {
+          const deletedStudent = StudentModel.findByIdAndRemove(params.id).exec();
+          if (!deletedStudent) {
+              throw new Error('Error')
+          }
+          return deletedStudent;
+        }
+      },
+
+      authenticate: {
+        type: loginType,
+        args: {
+          email: {
+            type: new GraphQLNonNull(GraphQLString),
+          },
+          password: {
+            type: new GraphQLNonNull(GraphQLString),
+          },
+        },
+        resolve: async function (root, params) {
+          console.log('params -> ', params);
+          const student = await StudentModel.findOne({email: params.email}).exec()
+          if(!student) {
+            throw new Error('Invalid Username!');
+          }
+
+          console.log('student -> ', student);
+          const isCorrectPassword = await bcrypt.compare(params.password, student.password);
+          if (!isCorrectPassword) {
+              throw new Error("Invalid Credentials!password")
+          }
+
+          // const token = jwt.sign({ _id: user._id, email: user.email }, jwtKey, {
+          //   algorithm: "RS256"
+          // });
+
+          // console.log('token:', token)
+          return {
+            id: student._id,
+            email: student.email
+          };
+        }
+      },
     };
   },
 });

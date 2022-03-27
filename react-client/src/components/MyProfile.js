@@ -82,9 +82,8 @@ mutation UpdateStudent(
 }`;
 
 export default function MyProfile({showSnackBar}) {
-	// const { authTokens } = useAuth();
-	// const [studentId, setStudentId] = useState(authTokens.data.id);
-	const [studentId, setStudentId] = useState('623fdef702abe174102bb900');
+	const { authTokens } = useAuth();
+	const [studentId, setStudentId] = useState(authTokens.id);
 	const [student, setStudent] = useState(null);
 	
 	const [studentNumber, setStudentNumber] = useState('');
@@ -175,6 +174,17 @@ export default function MyProfile({showSnackBar}) {
 		// proceed when all required field is valid
 		if (isValid) {
 
+			const localEnrolledCourses = enrolledCourses.map(course => ({...course}));
+			// remove _typename and _id on course objects to fix request failure
+			localEnrolledCourses.forEach(course => {
+				if (course._id) {
+					delete course._id;
+				}
+				if (course.__typename) {
+					delete course.__typename;
+				}
+			});
+
 			const studentRequest = {
 				id: studentId,
 				studentNumber: studentNumber,
@@ -186,7 +196,7 @@ export default function MyProfile({showSnackBar}) {
 				city: city,
 				phone: phone,
 				program: program,
-				enrolledCourses: enrolledCourses
+				enrolledCourses: localEnrolledCourses
 			}
 
 			console.log('update student request -> ', studentRequest);

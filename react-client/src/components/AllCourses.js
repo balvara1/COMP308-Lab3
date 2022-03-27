@@ -109,9 +109,8 @@ export default function AllCourses({showSnackBar}) {
 
   const classes = useStyles();
   const [courses, setCourses] = useState([]);
-  // const { authTokens } = useAuth();
-  // const [studentId, setStudentId] = useState(authTokens.data.id);
-  const [studentId, setStudentId] = useState('623fdef702abe174102bb900');
+  const { authTokens } = useAuth();
+  const [studentId, setStudentId] = useState(authTokens.id);
   const [course, setCourse] = useState(null);
   const [student, setStudent] = useState(null);
   const [section, setSection] = useState('');

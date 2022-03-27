@@ -1,4 +1,5 @@
 // Load the Mongoose module and Schema object
+const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -17,6 +18,12 @@ const StudentSchema = new Schema({
     email: String,
     program: String,
     enrolledCourses: [courseSchema]
+});
+
+StudentSchema.pre('save', async function () {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(this.password, salt);
+    this.password = hashedPassword;
 });
 
 // Create the 'Student' model out of the 'StudentSchema'

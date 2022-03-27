@@ -80,9 +80,14 @@ export default function Register({ showSnackBar, setTokens }) {
 		onCompleted: data => {
 			console.log(data);
 			showSnackBar({message: 'Registration Successful', severity: 'success'});
-			// setTokens(result);
-			// navigate('/myprofile');
-			navigate('/');
+			const student = data.addStudent;
+			const token = {
+				id: student._id,
+				email: student.email
+			};
+			setTokens(token);
+			navigate('/myprofile');
+			// navigate('/');
 		},
 		onError: error => {
 			showSnackBar({message: 'Something went wrong. Registration Failed', severity: 'danger'});

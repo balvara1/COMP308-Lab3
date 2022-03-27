@@ -96,9 +96,8 @@ mutation UpdateStudent(
 }`;
 
 export default function EnrolledCourses({ showSnackBar }) {
-  // const { authTokens } = useAuth();
-  // const [studentId, setStudentId] = useState(authTokens.data.id);
-  const [studentId, setStudentId] = useState('623fdef702abe174102bb900');
+  const { authTokens } = useAuth();
+  const [studentId, setStudentId] = useState(authTokens.id);
   const classes = useStyles();
   const [student, setStudent] = useState(null);
   const [courses, setCourses] = useState([]);

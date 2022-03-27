@@ -9,13 +9,13 @@ import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
 import { useState, forwardRef } from 'react';
 import Register from './components/Register';
-import axios from 'axios';
 import PrivateRoute from './PrivateRoute';
 import { AuthContext } from "./auth";
 import MyProfile from './components/MyProfile';
 import Logout from './components/Logout';
 import AllCourses from './components/AllCourses';
 import Classlist from './components/Classlist';
+import { gql, useMutation } from "@apollo/client";
 
 const theme = createTheme();
 
@@ -23,15 +23,26 @@ const Alert = forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
+// use mutation since login request doesn't work with useLazyQuery on subsequent tries
+const AUTHENTICATE_USER = gql`
+mutation authenticate($email: String!, $password: String!) {
+  authenticate(email: $email, password:$password) {
+    id,
+    email
+  }
+}`;
+
 export default function App() {
   const existingTokens = JSON.parse(localStorage.getItem("tokens"));
   const [authTokens, setAuthTokens] = useState(existingTokens);
   const navigate = useNavigate();
   
-  const apiUrl = 'http://localhost:5000/';
   const [sbSeverity, setSbSeverity] = useState('success');
   const [sbMsg, setSbMsg] = useState('');
   const [openSb, setOpenSb] = useState(false);
+
+  const [doLogin, { loading, error, data }] = useMutation(AUTHENTICATE_USER);
+
   const showSnackBar = (options) => {
     if (options) {
       setSbSeverity(options.severity);
@@ -60,48 +71,44 @@ export default function App() {
   const handleLogin = async (email, password) => {
     console.log('email -> ', email);
     console.log('password -> ', password);
-    const loginUrl = apiUrl + "login"
 
-    try {
-      const loginRequest = { auth: { email, password } };
-      const loginResponse = await axios.post(loginUrl, loginRequest);
+    const loginRequest = {
+      email,
+      password
+    }
 
-      console.log(loginResponse);
-      console.log(loginResponse.data);
-
-      const responseData = loginResponse.data;
-
-      if (responseData.data === null && responseData.status === 'error') {
-        console.log('error found on login');
-        const errorMsg = loginResponse.data.message;
-        showSnackBar({message: errorMsg, severity: 'error'});
-      } else {
-        console.log('no error found on login');
-        setTokens(loginResponse.data);
-        navigate("/myprofile");
+    doLogin({
+      variables: loginRequest,
+      onCompleted: data => {
+        if (data && data.authenticate) {
+          console.log('login data -> ', data);
+          setTokens(data.authenticate);
+          navigate("/myprofile");
+        }
+      },
+      onError: error => {
+        console.log('login error -> ', error.message);
+        showSnackBar({message: error.message, severity: 'error'});
       }
-
-    } catch(e) {
-      console.log('error trying to login -> ', e);
-    }
+    });
   }
 
-  const checkCookie = async () => {
-    const cookieUrl = apiUrl + "read_cookie";
-    try {
-      console.log('check cookie');
+  // const checkCookie = async () => {
+  //   const cookieUrl = apiUrl + "read_cookie";
+  //   try {
+  //     console.log('check cookie');
 
-      const cookieResponse = await axios.get(cookieUrl);
-      console.log(cookieResponse);
-      // if (res.data.screen !== undefined) {
-      //   setScreen(res.data.screen);
-      //   console.log(res.data.screen)
-      // }
-    } catch (e) {
+  //     const cookieResponse = await axios.get(cookieUrl);
+  //     console.log(cookieResponse);
+  //     // if (res.data.screen !== undefined) {
+  //     //   setScreen(res.data.screen);
+  //     //   console.log(res.data.screen)
+  //     // }
+  //   } catch (e) {
       
-      console.log(e);
-    }
-  }
+  //     console.log(e);
+  //   }
+  // }
 
   // useEffect(() => {
   //   checkCookie();
@@ -111,7 +118,7 @@ export default function App() {
     <div>
       {/*  { authTokens, setAuthTokens: setTokens }}> */}
       <ThemeProvider theme={theme}>
-        {/* <AuthContext.Provider value={{ authTokens, setAuthTokens: setTokens }}>
+        <AuthContext.Provider value={{ authTokens, setAuthTokens: setTokens }}>
 
           <Layout>
             <Routes>
@@ -126,20 +133,8 @@ export default function App() {
             </Routes>
           </Layout>
 
-        </AuthContext.Provider> */}
-
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Login handleLogin={handleLogin} />} />
-            <Route path="/students" element={<StudentList />} />
-            <Route path="/register" element={<Register showSnackBar={showSnackBar} setTokens={setTokens} />} />
-            <Route path="/courses" element={<AllCourses showSnackBar={showSnackBar} />} />
-            <Route path="/myprofile" element={<MyProfile showSnackBar={showSnackBar} />} />
-            <Route path="/mycourses" element={<EnrolledCourses showSnackBar={showSnackBar} />} />
-            <Route path="/classlist" element={<Classlist showSnackBar={showSnackBar} />} />
-          </Routes>
-        </Layout>
-        
+        </AuthContext.Provider>
+       
         <Snackbar
           anchorOrigin={{vertical: 'top', horizontal: 'right'}}
           open={openSb}
@@ -149,7 +144,6 @@ export default function App() {
           <Alert severity={sbSeverity} onClose={handleSbClose}>{sbMsg}</Alert>
         </Snackbar>
       </ThemeProvider>
-      
     </div>
   );
 }
