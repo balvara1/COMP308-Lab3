@@ -124,7 +124,7 @@ export default function MyProfile({showSnackBar}) {
 				// default to blank fields that are not required
 				setAddress(studentData.address || '');
 				setCity(studentData.city || '');
-				setPhone(studentData.phoneNumber || '');
+				setPhone(studentData.phone || '');
 				setProgram(studentData.program || '');
 
 				setEnrolledCourses(studentData.enrolledCourses);
@@ -220,7 +220,7 @@ export default function MyProfile({showSnackBar}) {
 		setLastName(student.lastName);
 		setAddress(student.address || '');
 		setCity(student.city || '');
-		setPhone(student.phoneNumber || '');
+		setPhone(student.phone || '');
 		setProgram(student.program || '');
 
 		resetErrors();
